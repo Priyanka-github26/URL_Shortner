@@ -1,56 +1,187 @@
 from flask import Flask, request, jsonify, redirect
-import sqlite3
-import string
-import random
+from datetime import datetime, timedelta
+from urllib.parse import urlparse
+
+from database import get_db, create_table, get_url, code_exists
+from utils import generate_code
+
 
 app = Flask(__name__)
 
 
-# -----------------------------
-# Database
-# -----------------------------
+# =========================================================
+# CREATE SHORT URL
+# =========================================================
 
-def get_db():
-    conn = sqlite3.connect("urls.db")
-    conn.row_factory = sqlite3.Row
-    return conn
+@app.route("/shorten", methods=["POST"])
+def shorten_url():
 
+    data = request.get_json(silent=True)
 
-def create_table():
+    print("DATA RECEIVED:", data)
+
+    # Check JSON
+    if not data:
+        return jsonify({
+            "error": "JSON body is required"
+        }), 400
+
+    # Check URL
+    if "url" not in data:
+        return jsonify({
+            "error": "URL is required"
+        }), 400
+
+    original_url = data["url"]
+
+    # Check URL type
+    if not isinstance(original_url, str):
+        return jsonify({
+            "error": "URL must be a string"
+        }), 400
+
+    # =====================================================
+    # URL VALIDATION
+    # =====================================================
+
+    parsed_url = urlparse(original_url)
+
+    if parsed_url.scheme not in ("http", "https") or not parsed_url.netloc:
+        return jsonify({
+            "error": "Invalid URL. Please provide a valid http:// or https:// URL"
+        }), 400
+
+    # =====================================================
+    # CUSTOM CODE
+    # =====================================================
+
+    custom_code = data.get("custom_code")
+
+    if custom_code:
+
+        if not isinstance(custom_code, str):
+            return jsonify({
+                "error": "Custom code must be a string"
+            }), 400
+
+        if not custom_code.isalnum():
+            return jsonify({
+                "error": "Custom code must contain only letters and numbers"
+            }), 400
+
+        if code_exists(custom_code):
+            return jsonify({
+                "error": "Custom code already exists"
+            }), 409
+
+        short_code = custom_code
+
+    else:
+
+        # Generate unique code
+        short_code = generate_code()
+
+        while code_exists(short_code):
+            short_code = generate_code()
+
+    # =====================================================
+    # EXPIRATION
+    # =====================================================
+
+    expires_at = None
+
+    expires_in = data.get("expires_in")
+
+    if expires_in is not None:
+
+        try:
+            expires_in = int(expires_in)
+
+            if expires_in <= 0:
+                return jsonify({
+                    "error": "expires_in must be greater than 0"
+                }), 400
+
+            expires_at = (
+                datetime.now() +
+                timedelta(seconds=expires_in)
+            ).isoformat()
+
+        except (ValueError, TypeError):
+            return jsonify({
+                "error": "expires_in must be a number"
+            }), 400
+
+    # =====================================================
+    # CREATED TIME
+    # =====================================================
+
+    created_at = datetime.now().isoformat()
+
+    # =====================================================
+    # SAVE TO DATABASE
+    # =====================================================
+
     conn = get_db()
 
     conn.execute("""
-        CREATE TABLE IF NOT EXISTS urls (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            original_url TEXT NOT NULL,
-            short_code TEXT UNIQUE NOT NULL
-        )
-    """)
+        INSERT INTO urls
+        (original_url, short_code, clicks, created_at, expires_at)
+        VALUES (?, ?, ?, ?, ?)
+    """, (
+        original_url,
+        short_code,
+        0,
+        created_at,
+        expires_at
+    ))
 
     conn.commit()
     conn.close()
 
+    # =====================================================
+    # RESPONSE
+    # =====================================================
 
-# -----------------------------
-# Generate Short Code
-# -----------------------------
-
-def generate_code(length=6):
-    characters = string.ascii_letters + string.digits
-
-    code = ''.join(
-        random.choice(characters)
-        for _ in range(length)
-    )
-
-    return code
+    return jsonify({
+        "message": "Short URL created successfully",
+        "original_url": original_url,
+        "short_code": short_code,
+        "short_url": f"http://localhost:5000/{short_code}",
+        "created_at": created_at,
+        "expires_at": expires_at
+    }), 201
 
 
-# -----------------------------
-# Check if Code Exists
-# -----------------------------
+# =========================================================
+# URL INFORMATION
+# =========================================================
 
-def code_exists(short_code):
+@app.route("/info/<short_code>", methods=["GET"])
+def get_info(short_code):
+
+    result = get_url(short_code)
+
+    if result is None:
+        return jsonify({
+            "error": "Short URL not found"
+        }), 404
+
+    return jsonify({
+        "short_code": result["short_code"],
+        "original_url": result["original_url"],
+        "clicks": result["clicks"],
+        "created_at": result["created_at"],
+        "expires_at": result["expires_at"]
+    }), 200
+
+
+# =========================================================
+# REDIRECT
+# =========================================================
+
+@app.route("/<short_code>", methods=["GET"])
+def redirect_url(short_code):
 
     conn = get_db()
 
@@ -59,86 +190,103 @@ def code_exists(short_code):
         (short_code,)
     ).fetchone()
 
-    conn.close()
+    # Short code not found
+    if result is None:
 
-    if result:
-        return True
-    else:
-        return False
+        conn.close()
 
-
-# -----------------------------
-# Create Short URL
-# -----------------------------
-
-@app.route("/shorten", methods=["POST"])
-def shorten_url():
-
-    data = request.get_json()
-
-    if not data or "url" not in data:
         return jsonify({
-            "error": "URL is required"
-        }), 400
+            "error": "Short URL not found"
+        }), 404
 
-    original_url = data["url"]
+    # =====================================================
+    # CHECK EXPIRATION
+    # =====================================================
 
-    # URL validation
-    if not original_url.startswith(("http://", "https://")):
-        return jsonify({
-            "error": "Invalid URL"
-        }), 400
+    if result["expires_at"]:
 
-    # Generate unique short code
-    short_code = generate_code()
+        expires_at = datetime.fromisoformat(
+            result["expires_at"]
+        )
 
-    while code_exists(short_code):
-        short_code = generate_code()
+        if datetime.now() >= expires_at:
 
-    conn = get_db()
+            conn.close()
+
+            return jsonify({
+                "error": "Short URL has expired"
+            }), 410
+
+    # =====================================================
+    # INCREASE CLICK COUNT
+    # =====================================================
 
     conn.execute(
-        "INSERT INTO urls (original_url, short_code) VALUES (?, ?)",
-        (original_url, short_code)
+        "UPDATE urls SET clicks = clicks + 1 WHERE short_code = ?",
+        (short_code,)
     )
 
     conn.commit()
     conn.close()
 
-    return jsonify({
-        "original_url": original_url,
-        "short_url": f"http://localhost:5000/{short_code}"
-    }), 201
+    # Redirect to original URL
+    return redirect(result["original_url"])
 
 
-# -----------------------------
-# Redirect
-# -----------------------------
+# =========================================================
+# DELETE SHORT URL
+# =========================================================
 
-@app.route("/<short_code>", methods=["GET"])
-def redirect_url(short_code):
+@app.route("/delete/<short_code>", methods=["DELETE"])
+def delete_url(short_code):
 
-    conn = get_db()
-
-    result = conn.execute(
-        "SELECT original_url FROM urls WHERE short_code = ?",
-        (short_code,)
-    ).fetchone()
-
-    conn.close()
+    result = get_url(short_code)
 
     if result is None:
         return jsonify({
             "error": "Short URL not found"
         }), 404
 
-    return redirect(result["original_url"])
+    conn = get_db()
+
+    conn.execute(
+        "DELETE FROM urls WHERE short_code = ?",
+        (short_code,)
+    )
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({
+        "message": "Short URL deleted successfully",
+        "short_code": short_code
+    }), 200
 
 
-# -----------------------------
-# Run Application
-# -----------------------------
+# =========================================================
+# HOME
+# =========================================================
+
+@app.route("/", methods=["GET"])
+def home():
+
+    return jsonify({
+        "message": "URL Shortener API is running",
+        "endpoints": {
+            "create": "POST /shorten",
+            "info": "GET /info/<short_code>",
+            "redirect": "GET /<short_code>",
+            "delete": "DELETE /delete/<short_code>"
+        }
+    }), 200
+
+
+# =========================================================
+# RUN APPLICATION
+# =========================================================
 
 if __name__ == "__main__":
+
     create_table()
+
     app.run(debug=True)
