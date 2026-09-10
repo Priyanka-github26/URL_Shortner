@@ -261,7 +261,38 @@ def delete_url(short_code):
         "message": "Short URL deleted successfully",
         "short_code": short_code
     }), 200
+    
+    # =========================================================
+# GET ALL SHORT URLs
+# =========================================================
 
+@app.route("/urls", methods=["GET"])
+def get_all_urls():
+
+    conn = get_db()
+
+    results = conn.execute(
+        "SELECT * FROM urls ORDER BY id DESC"
+    ).fetchall()
+
+    conn.close()
+
+    urls = []
+
+    for result in results:
+
+        urls.append({
+            "short_code": result["short_code"],
+            "original_url": result["original_url"],
+            "clicks": result["clicks"],
+            "created_at": result["created_at"],
+            "expires_at": result["expires_at"]
+        })
+
+    return jsonify({
+        "count": len(urls),
+        "urls": urls
+    }), 200
 
 # =========================================================
 # HOME
@@ -276,7 +307,8 @@ def home():
             "create": "POST /shorten",
             "info": "GET /info/<short_code>",
             "redirect": "GET /<short_code>",
-            "delete": "DELETE /delete/<short_code>"
+            "delete": "DELETE /delete/<short_code>",
+            "list": "GET /urls"
         }
     }), 200
 

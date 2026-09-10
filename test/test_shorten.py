@@ -111,3 +111,18 @@ def test_negative_expiration():
     data = response.get_json()
 
     assert data["error"] == "expires_in must be greater than 0"
+    
+def test_get_all_urls():
+    client = app.test_client()
+
+    response = client.get("/urls")
+
+    assert response.status_code == 200
+
+    data = response.get_json()
+
+    assert "count" in data
+    assert "urls" in data
+
+    assert isinstance(data["count"], int)
+    assert isinstance(data["urls"], list)
