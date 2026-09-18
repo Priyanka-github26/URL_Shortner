@@ -9,8 +9,7 @@ def test_home():
     assert response.status_code == 200
 
 
-def test_shorten_url():
-    client = app.test_client()
+def test_shorten_url(client):
 
     response = client.post(
         "/shorten",

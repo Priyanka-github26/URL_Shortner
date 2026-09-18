@@ -3,14 +3,20 @@ import sqlite3
 DATABASE = "urls.db"
 
 
-def get_db():
-    conn = sqlite3.connect(DATABASE)
+def get_db(database=None):
+
+    if database is None:
+        database = DATABASE
+
+    conn = sqlite3.connect(database)
     conn.row_factory = sqlite3.Row
+
     return conn
 
 
-def create_table():
-    conn = get_db()
+def create_table(database=None):
+
+    conn = get_db(database)
 
     conn.execute("""
         CREATE TABLE IF NOT EXISTS urls (
@@ -28,6 +34,7 @@ def create_table():
 
 
 def get_url(short_code):
+
     conn = get_db()
 
     result = conn.execute(
@@ -41,6 +48,7 @@ def get_url(short_code):
 
 
 def code_exists(short_code):
+
     conn = get_db()
 
     result = conn.execute(
