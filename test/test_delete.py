@@ -1,8 +1,7 @@
 from app import app
 
 
-def test_delete_url():
-    client = app.test_client()
+def test_delete_url(client):
 
     # Create a short URL
     response = client.post(

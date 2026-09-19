@@ -3,28 +3,38 @@ import tempfile
 import os
 
 import database
-from app import app
+import app
 
 
 @pytest.fixture
-def client():
+def client(monkeypatch):
 
     # Create temporary database
     db_fd, db_path = tempfile.mkstemp()
 
-    # Tell database.py to use temporary database
+    # Create the temporary database tables
+    original_database = database.DATABASE
     database.DATABASE = db_path
 
-    # Create tables in temporary database
     database.create_table()
 
-    # Create Flask test client
-    with app.test_client() as client:
+    # Make app.py use the temporary database
+    def test_get_db():
+        conn = database.sqlite3.connect(db_path)
+        conn.row_factory = database.sqlite3.Row
+        return conn
+
+    monkeypatch.setattr(app, "get_db", test_get_db)
+
+    # Also make database helper functions use temporary database
+    monkeypatch.setattr(database, "get_db", test_get_db)
+
+    with app.app.test_client() as client:
         yield client
+
+    # Restore database
+    database.DATABASE = original_database
 
     # Close and delete temporary database
     os.close(db_fd)
     os.unlink(db_path)
-
-    # Restore real database
-    database.DATABASE = "urls.db"

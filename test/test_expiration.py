@@ -2,8 +2,7 @@ from app import app
 import time
 
 
-def test_expired_url():
-    client = app.test_client()
+def test_expired_url(client):
 
     # Create URL that expires in 1 second
     response = client.post(
