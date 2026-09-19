@@ -1,8 +1,7 @@
 from app import app
 
 
-def test_redirect_and_click_count():
-    client = app.test_client()
+def test_redirect_and_click_count(client):
 
     # 1. Create a short URL
     response = client.post(
