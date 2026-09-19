@@ -260,3 +260,83 @@ This endpoint returns all short URLs stored in the database.
     ]
 }
 ```
+## Testing
+
+This project uses **pytest** for automated API testing.
+
+### Run Tests
+
+```bash
+python -m pytest -v
+```
+
+### Test Result
+
+The project currently contains **11 automated tests** covering:
+
+- Creating short URLs
+- Missing URL validation
+- Invalid URL validation
+- URL type validation
+- URL expiration
+- Negative expiration values
+- URL redirection
+- Click counting
+- URL deletion
+- Getting all URLs
+- Home/API status
+
+Example result:
+
+```text
+11 passed
+```
+
+The tests use a **temporary SQLite database**, so running the test suite does not modify the main `urls.db` database.
+
+## Project Structure
+
+```text
+URL_Shortner/
+│
+├── app.py
+├── database.py
+├── utils.py
+├── requirements.txt
+├── urls.db
+├── README.md
+│
+└── test/
+    ├── conftest.py
+    ├── test_shorten.py
+    ├── test_redirect.py
+    ├── test_expiration.py
+    └── test_delete.py
+```
+
+### File Description
+
+| File | Description |
+|------|-------------|
+| `app.py` | Main Flask application and API routes |
+| `database.py` | SQLite database connection and helper functions |
+| `utils.py` | Short code generation utilities |
+| `requirements.txt` | Python project dependencies |
+| `urls.db` | SQLite database |
+| `test/` | Automated API tests |
+| `conftest.py` | Pytest fixture and temporary test database setup |
+| `README.md` | Project documentation |
+
+## Future Improvements
+
+Possible improvements for this project include:
+
+- User authentication and authorization
+- Web-based frontend interface
+- QR code generation for short URLs
+- Advanced URL analytics
+- Rate limiting
+- API documentation using Swagger/OpenAPI
+- Docker support
+- Cloud database integration
+- Deployment to a cloud platform
