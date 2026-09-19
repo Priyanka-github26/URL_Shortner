@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>URL Shortener</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+
+<body>
+
+    <div class="container">
+
+        <!-- ========================= -->
+        <!-- HEADER -->
+        <!-- ========================= -->
+
+        <div class="logo">
+            🔗
+        </div>
+
+        <h1>
+            URL Shortener
+        </h1>
+
+        <p class="subtitle">
+            Turn long URLs into short, shareable links
+        </p>
+
+
+        <!-- ========================= -->
+        <!-- URL INPUT -->
+        <!-- ========================= -->
+
+        <div class="input-group">
+
+            <input
+                type="text"
+                id="urlInput"
+                placeholder="Enter your long URL"
+            >
+
+            <button
+                class="shorten-btn"
+                id="shortenButton"
+                onclick="shortenURL()">
+
+                Shorten URL
+
+            </button>
+
+        </div>
+
+
+        <!-- ========================= -->
+        <!-- ERROR MESSAGE -->
+        <!-- ========================= -->
+
+        <div
+            class="error"
+            id="errorMessage">
+        </div>
+
+
+        <!-- ========================= -->
+        <!-- RESULT -->
+        <!-- ========================= -->
+
+        <div
+            class="result"
+            id="resultBox"
+            style="display: none;">
+
+            <h3>
+                ✅ Your shortened URL
+            </h3>
+
+            <div class="short-url-box">
+
+                <div
+                    class="short-url"
+                    id="shortURL">
+                </div>
+
+                <button
+                    class="copy-btn"
+                    onclick="copyURL()">
+
+                    📋 Copy
+
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- ========================= -->
+        <!-- DASHBOARD -->
+        <!-- ========================= -->
+
+        <div class="dashboard">
+
+            <div class="dashboard-header">
+
+                <div>
+
+                    <h2>
+                        📊 Your URLs
+                    </h2>
+
+                    <p>
+                        Manage your shortened URLs
+                    </p>
+
+                </div>
+
+
+                <button
+                    class="refresh-btn"
+                    onclick="loadURLs()">
+
+                    🔄 Refresh
+
+                </button>
+
+            </div>
+
+
+            <!-- ========================= -->
+            <!-- ANALYTICS CARDS -->
+            <!-- ========================= -->
+
+            <div class="analytics">
+
+                <div class="analytics-card">
+
+                    <div class="analytics-icon">
+                        🔗
+                    </div>
+
+                    <div>
+
+                        <p>
+                            Total URLs
+                        </p>
+
+                        <h3 id="totalURLs">
+                            0
+                        </h3>
+
+                    </div>
+
+                </div>
+
+
+                <div class="analytics-card">
+
+                    <div class="analytics-icon">
+                        👆
+                    </div>
+
+                    <div>
+
+                        <p>
+                            Total Clicks
+                        </p>
+
+                        <h3 id="totalClicks">
+                            0
+                        </h3>
+
+                    </div>
+
+                </div>
+
+
+                <div class="analytics-card">
+
+                    <div class="analytics-icon">
+                        🟢
+                    </div>
+
+                    <div>
+
+                        <p>
+                            Active URLs
+                        </p>
+
+                        <h3 id="activeURLs">
+                            0
+                        </h3>
+
+                    </div>
+
+                </div>
+
+
+                <div class="analytics-card">
+
+                    <div class="analytics-icon">
+                        🔴
+                    </div>
+
+                    <div>
+
+                        <p>
+                            Expired URLs
+                        </p>
+
+                        <h3 id="expiredURLs">
+                            0
+                        </h3>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ========================= -->
+            <!-- SEARCH -->
+            <!-- ========================= -->
+
+            <div class="search-box">
+
+                <input
+                    type="text"
+                    id="searchInput"
+                    placeholder="🔍 Search URLs..."
+                    oninput="searchURLs()"
+                >
+
+            </div>
+
+
+            <!-- ========================= -->
+            <!-- URL TABLE -->
+            <!-- ========================= -->
+
+            <div class="table-container">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Short URL
+                            </th>
+
+                            <th>
+                                Original URL
+                            </th>
+
+                            <th>
+                                Clicks
+                            </th>
+
+                            <th>
+                                Created
+                            </th>
+
+                            <th>
+                                Expires
+                            </th>
+
+                            <th>
+                                Action
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody id="urlTableBody">
+
+                        <tr>
+
+                            <td
+                                colspan="6"
+                                class="no-data">
+
+                                Loading...
+
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+
+        <!-- ========================= -->
+        <!-- FOOTER -->
+        <!-- ========================= -->
+
+        <div class="footer">
+
+            Built with Flask + SQLite
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================= -->
+    <!-- JAVASCRIPT -->
+    <!-- ========================= -->
+
+    <script
+        src="{{ url_for('static', filename='script.js') }}">
+    </script>
+
+</body>
+
+</html>

@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, redirect
+from flask import Flask, request, jsonify, render_template, redirect
 from datetime import datetime, timedelta
 from urllib.parse import urlparse
 
@@ -262,7 +262,7 @@ def delete_url(short_code):
         "short_code": short_code
     }), 200
     
-    # =========================================================
+# =========================================================
 # GET ALL SHORT URLs
 # =========================================================
 
@@ -301,17 +301,7 @@ def get_all_urls():
 @app.route("/", methods=["GET"])
 def home():
 
-    return jsonify({
-        "message": "URL Shortener API is running",
-        "endpoints": {
-            "create": "POST /shorten",
-            "info": "GET /info/<short_code>",
-            "redirect": "GET /<short_code>",
-            "delete": "DELETE /delete/<short_code>",
-            "list": "GET /urls"
-        }
-    }), 200
-
+    return render_template("index.html")
 
 # =========================================================
 # DATABASE INITIALIZATION
