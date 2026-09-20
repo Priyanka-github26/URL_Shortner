@@ -42,24 +42,68 @@
         <!-- URL INPUT -->
         <!-- ========================= -->
 
-        <div class="input-group">
+        <div class="url-form">
 
-            <input
-                type="text"
-                id="urlInput"
-                placeholder="Enter your long URL"
-            >
+    <div class="input-main">
 
-            <button
-                class="shorten-btn"
-                id="shortenButton"
-                onclick="shortenURL()">
+        <label for="urlInput">
+            🔗 Enter your long URL
+        </label>
 
-                Shorten URL
+        <input
+            type="text"
+            id="urlInput"
+            placeholder="https://www.example.com"
+        >
 
-            </button>
+        <small>
+            🛡️ Valid URLs: http:// or https:// only
+        </small>
 
-        </div>
+    </div>
+
+
+    <div class="input-small">
+
+        <label for="customCode">
+            ⚙️ Custom Code
+        </label>
+
+        <input
+            type="text"
+            id="customCode"
+            placeholder="Optional"
+        >
+
+    </div>
+
+
+    <div class="input-small">
+
+        <label for="expiresIn">
+            🕐 Expiration
+        </label>
+
+        <input
+            type="number"
+            id="expiresIn"
+            placeholder="Seconds"
+            min="1"
+        >
+
+    </div>
+
+
+    <button
+        class="shorten-btn"
+        id="shortenButton"
+        onclick="shortenURL()">
+
+        🔗 Shorten URL →
+
+    </button>
+
+    </div>
 
 
         <!-- ========================= -->

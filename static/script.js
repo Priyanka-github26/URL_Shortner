@@ -1,18 +1,24 @@
-/* ========================= */
-/* GLOBAL URL DATA */
-/* ========================= */
+/* =========================================================
+   GLOBAL URL DATA
+   ========================================================= */
 
 let allURLs = [];
 
 
-/* ========================= */
-/* SHORTEN URL */
-/* ========================= */
+/* =========================================================
+   SHORTEN URL
+   ========================================================= */
 
 async function shortenURL() {
 
     const urlInput =
         document.getElementById("urlInput");
+
+    const customCodeInput =
+        document.getElementById("customCode");
+
+    const expiresInInput =
+        document.getElementById("expiresIn");
 
     const resultBox =
         document.getElementById("resultBox");
@@ -27,18 +33,32 @@ async function shortenURL() {
         document.getElementById("shortenButton");
 
 
+    /* -------------------------
+       GET INPUT VALUES
+       ------------------------- */
+
     const url =
         urlInput.value.trim();
 
+    const customCode =
+        customCodeInput.value.trim();
 
-    // Clear previous messages
+    const expiresIn =
+        expiresInInput.value.trim();
+
+
+    /* -------------------------
+       CLEAR PREVIOUS MESSAGES
+       ------------------------- */
 
     errorMessage.style.display = "none";
 
     resultBox.style.display = "none";
 
 
-    // Check empty URL
+    /* -------------------------
+       CHECK URL
+       ------------------------- */
 
     if (!url) {
 
@@ -49,13 +69,55 @@ async function shortenURL() {
             "block";
 
         return;
+    }
+
+
+    /* -------------------------
+       CHECK EXPIRATION
+       ------------------------- */
+
+    if (expiresIn && Number(expiresIn) <= 0) {
+
+        errorMessage.textContent =
+            "Expiration must be greater than 0 seconds.";
+
+        errorMessage.style.display =
+            "block";
+
+        return;
+    }
+
+
+    /* -------------------------
+       PREPARE REQUEST
+       ------------------------- */
+
+    const requestData = {
+        url: url
+    };
+
+
+    if (customCode) {
+
+        requestData.custom_code =
+            customCode;
 
     }
 
 
-    try {
+    if (expiresIn) {
 
-        // Loading state
+        requestData.expires_in =
+            Number(expiresIn);
+
+    }
+
+
+    /* -------------------------
+       SEND REQUEST
+       ------------------------- */
+
+    try {
 
         shortenButton.disabled = true;
 
@@ -73,9 +135,9 @@ async function shortenURL() {
                         "application/json"
                 },
 
-                body: JSON.stringify({
-                    url: url
-                })
+                body: JSON.stringify(
+                    requestData
+                )
 
             });
 
@@ -84,7 +146,9 @@ async function shortenURL() {
             await response.json();
 
 
-        // Handle API error
+        /* -------------------------
+           HANDLE ERROR
+           ------------------------- */
 
         if (!response.ok) {
 
@@ -96,11 +160,12 @@ async function shortenURL() {
                 "block";
 
             return;
-
         }
 
 
-        // Display shortened URL
+        /* -------------------------
+           DISPLAY RESULT
+           ------------------------- */
 
         shortURL.textContent =
             data.short_url;
@@ -109,14 +174,22 @@ async function shortenURL() {
             "block";
 
 
-        // Clear input
+        /* -------------------------
+           CLEAR INPUTS
+           ------------------------- */
 
         urlInput.value = "";
 
+        customCodeInput.value = "";
 
-        // Refresh dashboard
+        expiresInInput.value = "";
 
-        loadURLs();
+
+        /* -------------------------
+           REFRESH DASHBOARD
+           ------------------------- */
+
+        await loadURLs();
 
 
         console.log(
@@ -142,21 +215,19 @@ async function shortenURL() {
 
     finally {
 
-        // Restore button
-
         shortenButton.disabled = false;
 
         shortenButton.textContent =
-            "Shorten URL";
+            "🔗 Shorten URL →";
 
     }
 
 }
 
 
-/* ========================= */
-/* COPY URL */
-/* ========================= */
+/* =========================================================
+   COPY URL
+   ========================================================= */
 
 function copyURL() {
 
@@ -167,11 +238,13 @@ function copyURL() {
 
 
     navigator.clipboard.writeText(url)
+
         .then(function() {
 
             alert("URL copied!");
 
         })
+
         .catch(function(error) {
 
             console.error(error);
@@ -183,9 +256,9 @@ function copyURL() {
 }
 
 
-/* ========================= */
-/* LOAD ALL URLS */
-/* ========================= */
+/* =========================================================
+   LOAD ALL URLS
+   ========================================================= */
 
 async function loadURLs() {
 
@@ -232,17 +305,11 @@ async function loadURLs() {
         }
 
 
-        // Store URLs globally
+        allURLs =
+            data.urls || [];
 
-        allURLs = data.urls;
-
-
-        // Update analytics
 
         updateAnalytics(allURLs);
-
-
-        // Display URLs
 
         displayURLs(allURLs);
 
@@ -275,9 +342,9 @@ async function loadURLs() {
 }
 
 
-/* ========================= */
-/* DISPLAY URLS */
-/* ========================= */
+/* =========================================================
+   DISPLAY URLS
+   ========================================================= */
 
 function displayURLs(urls) {
 
@@ -289,8 +356,6 @@ function displayURLs(urls) {
 
     tableBody.innerHTML = "";
 
-
-    // No URLs
 
     if (!urls || urls.length === 0) {
 
@@ -314,8 +379,6 @@ function displayURLs(urls) {
 
     }
 
-
-    // Display each URL
 
     urls.forEach(function(url) {
 
@@ -377,9 +440,7 @@ function displayURLs(urls) {
 
                 <button
                     class="delete-btn"
-                    onclick="deleteURL(
-                        '${url.short_code}'
-                    )">
+                    onclick="deleteURL('${url.short_code}')">
 
                     🗑️ Delete
 
@@ -397,9 +458,9 @@ function displayURLs(urls) {
 }
 
 
-/* ========================= */
-/* DELETE URL */
-/* ========================= */
+/* =========================================================
+   DELETE URL
+   ========================================================= */
 
 async function deleteURL(shortCode) {
 
@@ -420,7 +481,7 @@ async function deleteURL(shortCode) {
 
         const response =
             await fetch(
-                `/delete/${shortCode}`,
+                `/delete/${encodeURIComponent(shortCode)}`,
                 {
                     method: "DELETE"
                 }
@@ -448,9 +509,7 @@ async function deleteURL(shortCode) {
         );
 
 
-        // Refresh dashboard
-
-        loadURLs();
+        await loadURLs();
 
     }
 
@@ -458,7 +517,6 @@ async function deleteURL(shortCode) {
     catch (error) {
 
         console.error(error);
-
 
         alert(
             "Unable to connect to the server."
@@ -469,9 +527,9 @@ async function deleteURL(shortCode) {
 }
 
 
-/* ========================= */
-/* SEARCH URLS */
-/* ========================= */
+/* =========================================================
+   SEARCH URLS
+   ========================================================= */
 
 function searchURLs() {
 
@@ -487,8 +545,6 @@ function searchURLs() {
             .trim();
 
 
-    // Empty search
-
     if (!searchText) {
 
         displayURLs(allURLs);
@@ -497,8 +553,6 @@ function searchURLs() {
 
     }
 
-
-    // Filter URLs
 
     const filteredURLs =
         allURLs.filter(function(url) {
@@ -525,30 +579,27 @@ function searchURLs() {
 }
 
 
-/* ========================= */
-/* UPDATE ANALYTICS */
-/* ========================= */
+/* =========================================================
+   UPDATE ANALYTICS
+   ========================================================= */
 
 function updateAnalytics(urls) {
-
-    // Total URLs
 
     const total =
         urls.length;
 
 
-    // Total clicks
-
     const clicks =
-        urls.reduce(function(total, url) {
+        urls.reduce(
+            function(total, url) {
 
-            return total +
-                Number(url.clicks || 0);
+                return total +
+                    Number(url.clicks || 0);
 
-        }, 0);
+            },
+            0
+        );
 
-
-    // Current time
 
     const now =
         new Date();
@@ -559,11 +610,9 @@ function updateAnalytics(urls) {
     let expired = 0;
 
 
-    // Check URL status
-
     urls.forEach(function(url) {
 
-        // URL without expiration
+        /* Never expires */
 
         if (!url.expires_at) {
 
@@ -592,8 +641,6 @@ function updateAnalytics(urls) {
     });
 
 
-    // Update cards
-
     document.getElementById(
         "totalURLs"
     ).textContent = total;
@@ -616,13 +663,11 @@ function updateAnalytics(urls) {
 }
 
 
-/* ========================= */
-/* EXPIRY STATUS */
-/* ========================= */
+/* =========================================================
+   EXPIRY STATUS
+   ========================================================= */
 
 function getExpiryStatus(expiresAt) {
-
-    // URL never expires
 
     if (!expiresAt) {
 
@@ -643,8 +688,6 @@ function getExpiryStatus(expiresAt) {
         new Date();
 
 
-    // URL expired
-
     if (expirationDate <= now) {
 
         return `
@@ -656,8 +699,6 @@ function getExpiryStatus(expiresAt) {
     }
 
 
-    // URL is active
-
     return `
         <span class="active-status">
             🟢 ${formatDate(expiresAt)}
@@ -667,9 +708,9 @@ function getExpiryStatus(expiresAt) {
 }
 
 
-/* ========================= */
-/* TRUNCATE LONG URL */
-/* ========================= */
+/* =========================================================
+   TRUNCATE LONG URL
+   ========================================================= */
 
 function truncateURL(url) {
 
@@ -687,14 +728,17 @@ function truncateURL(url) {
     }
 
 
-    return url.substring(0, 40) + "...";
+    return (
+        url.substring(0, 40) +
+        "..."
+    );
 
 }
 
 
-/* ========================= */
-/* FORMAT DATE */
-/* ========================= */
+/* =========================================================
+   FORMAT DATE
+   ========================================================= */
 
 function formatDate(date) {
 
@@ -711,31 +755,39 @@ function formatDate(date) {
 }
 
 
-/* ========================= */
-/* LOAD DASHBOARD */
-/* ========================= */
+/* =========================================================
+   ENTER KEY SUPPORT
+   ========================================================= */
 
 document.addEventListener(
     "DOMContentLoaded",
-    loadURLs
-);
+    function() {
+
+        loadURLs();
 
 
-/* ========================= */
-/* ENTER KEY SUPPORT */
-/* ========================= */
+        const urlInput =
+            document.getElementById(
+                "urlInput"
+            );
 
-document
-    .getElementById("urlInput")
-    .addEventListener(
-        "keydown",
-        function(event) {
 
-            if (event.key === "Enter") {
+        if (urlInput) {
 
-                shortenURL();
+            urlInput.addEventListener(
+                "keydown",
+                function(event) {
 
-            }
+                    if (event.key === "Enter") {
+
+                        shortenURL();
+
+                    }
+
+                }
+            );
 
         }
-    );
+
+    }
+);
