@@ -246,6 +246,7 @@ def redirect_url(short_code):
 # =========================================================
 
 @app.route("/delete/<short_code>", methods=["DELETE"])
+@limiter.limit("10 per minute")
 def delete_url(short_code):
 
     result = get_url(short_code)
@@ -275,6 +276,7 @@ def delete_url(short_code):
 # =========================================================
 
 @app.route("/urls", methods=["GET"])
+@limiter.limit("20 per minute")
 def get_all_urls():
 
     conn = get_db()
