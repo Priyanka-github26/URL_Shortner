@@ -125,3 +125,18 @@ def test_get_all_urls():
 
     assert isinstance(data["count"], int)
     assert isinstance(data["urls"], list)
+    
+def test_rate_limit(client):
+    for _ in range(10):
+        response = client.post(
+            "/shorten",
+            json={"url": "https://www.google.com"}
+        )
+        assert response.status_code == 201
+
+    response = client.post(
+        "/shorten",
+        json={"url": "https://www.google.com"}
+    )
+
+    assert response.status_code == 429

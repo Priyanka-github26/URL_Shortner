@@ -29,8 +29,14 @@ def client(monkeypatch):
     # Also make database helper functions use temporary database
     monkeypatch.setattr(database, "get_db", test_get_db)
 
+    # Reset rate limiter before test
+    app.limiter.reset()
+
     with app.app.test_client() as client:
         yield client
+
+    # Reset rate limiter after test
+    app.limiter.reset()
 
     # Restore database
     database.DATABASE = original_database

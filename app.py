@@ -1,12 +1,18 @@
-from flask import Flask, request, jsonify, render_template, redirect
+from flask import Flask, request, jsonify, redirect, render_template
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from datetime import datetime, timedelta
 from urllib.parse import urlparse
 
 from database import get_db, create_table, get_url, code_exists
 from utils import generate_code
 
-
 app = Flask(__name__)
+limiter = Limiter(
+    key_func=get_remote_address,
+    app=app,
+    default_limits=[]
+)
 
 
 # =========================================================
@@ -14,7 +20,8 @@ app = Flask(__name__)
 # =========================================================
 
 @app.route("/shorten", methods=["POST"])
-def shorten_url():
+@limiter.limit("10 per minute")
+def shorten():
 
     data = request.get_json(silent=True)
 
@@ -158,6 +165,7 @@ def shorten_url():
 # =========================================================
 
 @app.route("/info/<short_code>", methods=["GET"])
+@limiter.limit("30 per minute")
 def get_info(short_code):
 
     result = get_url(short_code)
