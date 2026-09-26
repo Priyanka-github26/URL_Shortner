@@ -140,3 +140,34 @@ def test_rate_limit(client):
     )
 
     assert response.status_code == 429
+    
+def test_click_history(client):
+    # Create short URL
+    response = client.post(
+        "/shorten",
+        json={"url": "https://www.google.com"}
+    )
+
+    assert response.status_code == 201
+
+    short_code = response.get_json()["short_code"]
+
+    # Click the short URL twice
+    response = client.get(f"/{short_code}")
+    assert response.status_code == 302
+
+    response = client.get(f"/{short_code}")
+    assert response.status_code == 302
+
+    # Get click history
+    response = client.get(
+        f"/analytics/{short_code}/history"
+    )
+
+    assert response.status_code == 200
+
+    data = response.get_json()
+
+    assert data["short_code"] == short_code
+    assert data["total_clicks"] == 2
+    assert len(data["click_history"]) == 2

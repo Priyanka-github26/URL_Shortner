@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify, redirect, render_template
+import database
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from datetime import datetime, timedelta
@@ -176,13 +177,79 @@ def get_info(short_code):
         }), 404
 
     return jsonify({
+    "short_code": result["short_code"],
+    "original_url": result["original_url"],
+    "clicks": result["clicks"],
+    "created_at": result["created_at"],
+    "expires_at": result["expires_at"],
+    "last_clicked_at": result["last_clicked_at"]
+}), 200
+
+# =========================================================
+# CLICK ANALYTICS
+# =========================================================
+
+@app.route("/analytics/<short_code>", methods=["GET"])
+@limiter.limit("30 per minute")
+def get_analytics(short_code):
+
+    result = get_url(short_code)
+
+    if result is None:
+        return jsonify({
+            "error": "Short URL not found"
+        }), 404
+
+    return jsonify({
         "short_code": result["short_code"],
         "original_url": result["original_url"],
-        "clicks": result["clicks"],
+        "total_clicks": result["clicks"],
         "created_at": result["created_at"],
-        "expires_at": result["expires_at"]
+        "last_clicked_at": result["last_clicked_at"]
     }), 200
 
+# =========================================================
+# CLICK HISTORY
+# =========================================================
+
+@app.route("/analytics/<short_code>/history", methods=["GET"])
+@limiter.limit("30 per minute")
+def get_click_history(short_code):
+
+    # Check if short URL exists
+    result = get_url(short_code)
+
+    if result is None:
+        return jsonify({
+            "error": "Short URL not found"
+        }), 404
+
+    conn = get_db()
+
+    clicks = conn.execute(
+        """
+        SELECT clicked_at
+        FROM clicks
+        WHERE short_code = ?
+        ORDER BY id DESC
+        """,
+        (short_code,)
+    ).fetchall()
+
+    conn.close()
+
+    history = []
+
+    for click in clicks:
+        history.append({
+            "clicked_at": click["clicked_at"]
+        })
+
+    return jsonify({
+        "short_code": short_code,
+        "total_clicks": len(history),
+        "click_history": history
+    }), 200
 
 # =========================================================
 # REDIRECT
@@ -228,10 +295,23 @@ def redirect_url(short_code):
     # =====================================================
     # INCREASE CLICK COUNT
     # =====================================================
+    last_clicked_at = datetime.now().isoformat()
 
     conn.execute(
-        "UPDATE urls SET clicks = clicks + 1 WHERE short_code = ?",
-        (short_code,)
+        """
+        UPDATE urls
+        SET clicks = clicks + 1,
+            last_clicked_at = ?
+        WHERE short_code = ?
+        """,
+        (last_clicked_at, short_code)
+    )
+    conn.execute(
+        """
+        INSERT INTO clicks (short_code, clicked_at)
+        VALUES (?, ?)
+        """,
+        (short_code, last_clicked_at)
     )
 
     conn.commit()
@@ -318,6 +398,7 @@ def home():
 # =========================================================
 
 create_table()
+database.add_analytics_column()
 
 
 # =========================================================
@@ -325,4 +406,4 @@ create_table()
 # =========================================================
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(debug=True)

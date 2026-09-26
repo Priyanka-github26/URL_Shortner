@@ -19,11 +19,36 @@ def create_table():
             short_code TEXT UNIQUE NOT NULL,
             clicks INTEGER DEFAULT 0,
             created_at TEXT,
-            expires_at TEXT
+            expires_at TEXT,
+            last_clicked_at TEXT
+        )
+    """)
+
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS clicks (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            short_code TEXT NOT NULL,
+            clicked_at TEXT NOT NULL
         )
     """)
 
     conn.commit()
+    conn.close()
+
+
+def add_analytics_column():
+    conn = get_db()
+
+    columns = conn.execute("PRAGMA table_info(urls)").fetchall()
+
+    column_names = [column["name"] for column in columns]
+
+    if "last_clicked_at" not in column_names:
+        conn.execute(
+            "ALTER TABLE urls ADD COLUMN last_clicked_at TEXT"
+        )
+        conn.commit()
+
     conn.close()
 
 

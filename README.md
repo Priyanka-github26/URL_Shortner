@@ -1,61 +1,80 @@
 # 🔗 URL Shortener
 
-A full-stack URL Shortener application built using **Python, Flask, SQLite, HTML, CSS and JavaScript**.
+A full-stack URL Shortener application built using **Python, Flask, SQLite, HTML, CSS, and JavaScript**.
 
-The application allows users to convert long URLs into short, shareable links and manage them through a web dashboard. It also provides REST APIs for creating, redirecting, tracking, listing and deleting shortened URLs.
+The application provides REST APIs and a responsive web dashboard for creating, managing, and tracking shortened URLs.
 
 ---
 
-## ✨ Features
+## 🚀 Features
 
-- Create short URLs
-- Automatic 6-character short code generation
-- Custom short codes
-- URL validation
-- URL expiration
-- Click tracking
-- URL information API
-- URL redirection
-- Delete short URLs
-- View all created URLs
-- Search URLs
-- Copy shortened URLs
-- Analytics dashboard
-- Active and expired URL status
-- Responsive web interface
-- SQLite database
-- REST API
-- Automated API testing using pytest
-- Separate temporary database for tests
+### URL Management
+
+* Create shortened URLs
+* Automatically generate unique 6-character short codes
+* Create custom short codes
+* Validate URLs
+* Set URL expiration time
+* Redirect short URLs to original URLs
+* Delete shortened URLs
+* View all created URLs
+* Search URLs
+* Copy shortened URLs
+
+### 📊 Click Analytics
+
+* Track total clicks
+* Store individual click events
+* Record the timestamp of every click
+* Track the most recent click
+* View complete click history
+* Dedicated analytics APIs
+
+### 🔐 API Security
+
+* Rate limiting using Flask-Limiter
+* Different request limits for different endpoints
+* Returns `429 Too Many Requests` when limits are exceeded
+
+### 🧪 Testing
+
+* Automated API testing using pytest
+* 13 automated tests
+* Isolated temporary database for testing
+* Tests for URL creation, validation, expiration, redirection, deletion, analytics, and rate limiting
+
+### 🎨 Web Dashboard
+
+* Responsive user interface
+* URL creation form
+* URL listing
+* Search functionality
+* Copy shortened URL
+* Click statistics
+* Active/expired URL status
+* Analytics information
 
 ---
 
 ## 🛠️ Technologies Used
 
-### Backend
-
-- Python
-- Flask
-- SQLite
-- REST API
-
-### Frontend
-
-- HTML
-- CSS
-- JavaScript
-
-### Testing & Tools
-
-- pytest
-- Postman
-- Git
-- GitHub
-- VS Code
+* **Python**
+* **Flask**
+* **SQLite**
+* **REST API**
+* **HTML5**
+* **CSS3**
+* **JavaScript**
+* **Flask-Limiter**
+* **pytest**
+* **Postman**
+* **Git**
+* **GitHub**
+* **VS Code**
 
 ---
 
-## 📂 Project Structure
+## 📁 Project Structure
 
 ```text
 URL_shortner/
@@ -80,401 +99,479 @@ URL_shortner/
     ├── test_redirect.py
     ├── test_expiration.py
     └── test_delete.py
+```
 
-🚀 Installation and Setup
-1. Clone the Repository
-git clone <your-github-repository-url>
-2. Open the Project Folder
-cd URL_shortner
-3. Install Dependencies
+---
+
+# ⚙️ Installation & Setup
+
+## 1. Clone the repository
+
+```bash
+git clone https://github.com/Priyanka-github26/URL_Shortner.git
+```
+
+## 2. Navigate to the project
+
+```bash
+cd URL_Shortner
+```
+
+## 3. Create a virtual environment
+
+```bash
+python -m venv venv
+```
+
+## 4. Activate the virtual environment
+
+### Windows
+
+```bash
+venv\Scripts\activate
+```
+
+### macOS/Linux
+
+```bash
+source venv/bin/activate
+```
+
+## 5. Install dependencies
+
+```bash
 pip install -r requirements.txt
-4. Run the Application
+```
+
+## 6. Run the application
+
+```bash
 python app.py
+```
 
-The application will start at:
+The application will run at:
 
+```text
 http://127.0.0.1:5000
+```
 
-Open the URL in your browser to access the web dashboard.
+---
 
-🌐 Web Dashboard
+# 🌐 Web Dashboard
 
-The application includes a web-based dashboard for managing shortened URLs.
+Open:
 
-The dashboard provides:
+```text
+http://127.0.0.1:5000
+```
 
-Total URLs
-Total clicks
-Active URLs
-Expired URLs
-Search functionality
-Copy shortened URL
-Delete URL
-URL creation date
-URL expiration status
-Click tracking
-Responsive design
+The dashboard allows users to:
 
-Users can enter a long URL and generate a shortened URL directly from the web interface.
+* Enter a long URL
+* Generate a shortened URL
+* Create custom short codes
+* Search URLs
+* Copy shortened URLs
+* View click statistics
+* View URL status
+* Manage shortened URLs
 
-🔌 REST API Endpoints
-Method	Endpoint	Description
-POST	/shorten	Create a short URL
-GET	/info/<short_code>	Get information about a short URL
-GET	/<short_code>	Redirect to the original URL
-DELETE	/delete/<short_code>	Delete a short URL
-GET	/urls	Get all short URLs
-GET	/	Open the web dashboard
-📡 API Usage
-1. Create a Short URL
-Request
+---
+
+# 🔌 REST API Endpoints
+
+| Method | Endpoint                          | Description              |
+| ------ | --------------------------------- | ------------------------ |
+| POST   | `/shorten`                        | Create a shortened URL   |
+| GET    | `/<short_code>`                   | Redirect to original URL |
+| GET    | `/info/<short_code>`              | Get URL information      |
+| GET    | `/urls`                           | Get all shortened URLs   |
+| DELETE | `/delete/<short_code>`            | Delete a shortened URL   |
+| GET    | `/analytics/<short_code>`         | Get click analytics      |
+| GET    | `/analytics/<short_code>/history` | Get click history        |
+| GET    | `/`                               | API/home status          |
+
+---
+
+# 📝 API Usage
+
+## 1. Create Short URL
+
+### Request
+
+```http
 POST /shorten
-Content-Type: application/json
-Request Body
+```
+
+### JSON Body
+
+```json
 {
     "url": "https://www.google.com"
 }
-Example Response
+```
+
+### Example Response
+
+```json
 {
     "message": "Short URL created successfully",
-    "original_url": "https://www.google.com",
-    "short_code": "abc123",
-    "short_url": "http://localhost:5000/abc123",
-    "created_at": "2026-09-19T15:00:00",
-    "expires_at": null
+    "short_code": "xhc6O3",
+    "short_url": "http://localhost:5000/xhc6O3"
 }
+```
 
-The API automatically generates a unique 6-character short code.
+---
 
-🔑 2. Create a Short URL with Custom Code
-Request
+## 2. Create Custom Short URL
+
+### Request
+
+```http
 POST /shorten
-Content-Type: application/json
-Request Body
+```
+
+### JSON Body
+
+```json
 {
     "url": "https://www.google.com",
     "custom_code": "google"
 }
+```
 
-The API creates:
+The generated short URL will be:
 
+```text
 http://localhost:5000/google
+```
 
-The custom_code must:
+---
 
-Be unique
-Contain only letters and numbers
+## 3. URL Expiration
 
-If the custom code already exists, the API returns a conflict response.
+Expiration can be specified using `expires_in`.
 
-⏱️ 3. Create an Expiring Short URL
+Example:
 
-The API supports temporary short URLs using the expires_in parameter.
-
-Request
-POST /shorten
-Content-Type: application/json
-Request Body
+```json
 {
     "url": "https://www.google.com",
     "expires_in": 60
 }
+```
 
-The expires_in value represents the expiration time in seconds.
+The URL will expire after **60 seconds**.
 
-For example:
+Expired URLs cannot be redirected.
 
-60 seconds = 1 minute
+---
 
-After the specified time, the short URL becomes unavailable.
+# 🔀 URL Redirection
 
-Expired URL Response
+When a user opens:
+
+```text
+http://localhost:5000/xhc6O3
+```
+
+the application:
+
+1. Finds the short code
+2. Checks whether the URL exists
+3. Checks expiration
+4. Increments the click count
+5. Stores the click timestamp
+6. Updates the latest click time
+7. Redirects the user to the original URL
+
+---
+
+# 📊 Click Analytics
+
+The application provides dedicated APIs for monitoring URL usage.
+
+## Get Analytics
+
+```http
+GET /analytics/<short_code>
+```
+
+Example:
+
+```text
+GET /analytics/xhc6O3
+```
+
+### Response
+
+```json
 {
-    "error": "Short URL has expired"
-}
-
-The API returns:
-
-410 Gone
-📊 4. Get URL Information
-Request
-GET /info/abc123
-
-This endpoint provides information about a shortened URL.
-
-The response includes:
-
-Short code
-Original URL
-Click count
-Creation time
-Expiration time
-Example Response
-{
-    "short_code": "abc123",
+    "short_code": "xhc6O3",
     "original_url": "https://www.google.com",
-    "clicks": 3,
-    "created_at": "2026-09-19T15:00:00",
-    "expires_at": null
+    "total_clicks": 3,
+    "created_at": "2026-09-26T16:10:00",
+    "last_clicked_at": "2026-09-26T16:15:42"
 }
-🔄 5. Redirect to the Original URL
-Request
-GET /abc123
+```
 
-When the short URL is opened, the application redirects the user to the original URL.
+---
 
-For every successful redirect, the click count is increased by 1.
+# 📈 Click History
 
-For example:
+The application stores every successful click event.
 
-http://localhost:5000/abc123
+### Endpoint
 
-redirects to:
+```http
+GET /analytics/<short_code>/history
+```
 
-https://www.google.com
-🗑️ 6. Delete a Short URL
-Request
-DELETE /delete/abc123
+Example:
 
-This permanently deletes the short URL from the database.
+```text
+GET /analytics/xhc6O3/history
+```
 
-After deletion, accessing the short URL returns:
+### Response
 
+```json
 {
-    "error": "Short URL not found"
-}
-
-with HTTP status:
-
-404 Not Found
-📋 7. View All Short URLs
-Request
-GET /urls
-
-This endpoint returns all shortened URLs stored in the database.
-
-Example Response
-{
-    "count": 2,
-    "urls": [
+    "short_code": "xhc6O3",
+    "total_clicks": 3,
+    "click_history": [
         {
-            "short_code": "abc123",
-            "original_url": "https://www.google.com",
-            "clicks": 3,
-            "created_at": "2026-09-19T15:00:00",
-            "expires_at": null
+            "clicked_at": "2026-09-26T16:15:42"
         },
         {
-            "short_code": "google",
-            "original_url": "https://www.google.com",
-            "clicks": 1,
-            "created_at": "2026-09-19T15:05:00",
-            "expires_at": null
+            "clicked_at": "2026-09-26T16:14:31"
+        },
+        {
+            "clicked_at": "2026-09-26T16:13:20"
         }
     ]
 }
-🏠 8. Web Dashboard
-Request
-GET /
+```
 
-The root endpoint opens the web dashboard.
+---
 
-The dashboard is built using:
+# 🔐 Rate Limiting
 
-HTML
-CSS
-JavaScript
+The API uses **Flask-Limiter** to prevent excessive requests.
 
-It communicates with the Flask REST API using JavaScript fetch() requests.
+| Endpoint                              |              Limit |
+| ------------------------------------- | -----------------: |
+| `POST /shorten`                       | 10 requests/minute |
+| `GET /info/<short_code>`              | 30 requests/minute |
+| `GET /urls`                           | 20 requests/minute |
+| `DELETE /delete/<short_code>`         | 10 requests/minute |
+| `GET /analytics/<short_code>`         | 30 requests/minute |
+| `GET /analytics/<short_code>/history` | 30 requests/minute |
 
-🧪 Testing
+When the configured limit is exceeded, the API returns:
 
-This project uses pytest for automated API testing.
+```text
+429 Too Many Requests
+```
 
-Run Tests
+This helps protect the API from excessive requests.
+
+---
+
+# 🗃️ Database
+
+The application uses **SQLite** to store shortened URLs and click analytics.
+
+## `urls` Table
+
+| Field             | Description                        |
+| ----------------- | ---------------------------------- |
+| `id`              | Unique database ID                 |
+| `original_url`    | Original long URL                  |
+| `short_code`      | Generated or custom short code     |
+| `clicks`          | Number of successful redirects     |
+| `created_at`      | URL creation timestamp             |
+| `expires_at`      | URL expiration timestamp           |
+| `last_clicked_at` | Timestamp of the most recent click |
+
+## `clicks` Table
+
+| Field        | Description                 |
+| ------------ | --------------------------- |
+| `id`         | Unique click event ID       |
+| `short_code` | Short code that was clicked |
+| `clicked_at` | Timestamp of the click      |
+
+---
+
+# 🧪 Testing
+
+This project uses **pytest** for automated API testing.
+
+## Run Tests
+
+```bash
 python -m pytest -v
-Test Coverage
+```
 
-The project currently contains 11 automated tests covering:
+## Test Coverage
 
-Creating short URLs
-Missing URL validation
-Invalid URL validation
-URL type validation
-URL expiration
-Negative expiration values
-URL redirection
-Click counting
-URL deletion
-Getting all URLs
-Home/dashboard endpoint
+The project currently contains **13 automated tests** covering:
+
+* Creating short URLs
+* Missing URL validation
+* Invalid URL validation
+* URL type validation
+* URL expiration
+* Negative expiration values
+* URL redirection
+* Click counting
+* Click history
+* URL deletion
+* Getting all URLs
+* Home/dashboard endpoint
+* Rate limiting
 
 Example result:
 
-11 passed
-🗄️ Test Database
+```text
+13 passed
+```
 
-The automated tests use a temporary SQLite database.
+The tests use a **temporary SQLite database**, so testing does not modify the main application database.
 
-This ensures that:
+---
 
-Test data does not affect the main database
-Tests can run independently
-The development database remains unchanged
-🗃️ Database
+# 📮 Postman Testing
 
-The application uses SQLite to store shortened URLs.
+The APIs can be tested using **Postman**.
 
-The main urls table contains:
+Example requests:
 
-Field	Description
-id	Unique database ID
-original_url	Original long URL
-short_code	Generated or custom short code
-clicks	Number of successful redirects
-created_at	URL creation timestamp
-expires_at	URL expiration timestamp
-🔐 URL Validation
+### Create URL
 
-The application validates URLs before storing them.
+```text
+POST http://127.0.0.1:5000/shorten
+```
 
-Only URLs using:
+Body:
 
-http://
-https://
-
-are accepted.
-
-For example:
-
-https://www.google.com
-
-is valid.
-
-An invalid URL returns an error response instead of being stored.
-
-⚡ Custom Short Codes
-
-Users can optionally provide their own short code.
-
-Example:
-
+```json
 {
-    "url": "https://www.google.com",
-    "custom_code": "google"
+    "url": "https://www.google.com"
 }
+```
 
-The application checks whether the custom code already exists.
+### Get Information
 
-If it already exists, the API returns:
+```text
+GET http://127.0.0.1:5000/info/<short_code>
+```
 
-{
-    "error": "Custom code already exists"
-}
+### Get Analytics
 
-with HTTP status:
+```text
+GET http://127.0.0.1:5000/analytics/<short_code>
+```
 
-409 Conflict
-📈 Click Tracking
+### Get Click History
 
-Every successful visit to a shortened URL increases its click count.
+```text
+GET http://127.0.0.1:5000/analytics/<short_code>/history
+```
 
-For example:
+### Delete URL
 
-Initial clicks: 0
-First visit:    1
-Second visit:   2
-Third visit:    3
+```text
+DELETE http://127.0.0.1:5000/delete/<short_code>
+```
 
-The click count can be viewed using:
+---
 
-GET /info/<short_code>
+# 🏗️ Application Flow
 
-and through the web dashboard.
+```text
+                User
+                  │
+                  ▼
+          Web Dashboard / Postman
+                  │
+                  ▼
+              Flask API
+                  │
+        ┌─────────┼─────────┐
+        │         │         │
+        ▼         ▼         ▼
+   Validation  Rate Limit  Analytics
+        │         │         │
+        └─────────┼─────────┘
+                  │
+                  ▼
+              SQLite
+             /       \
+            ▼         ▼
+         urls       clicks
+```
 
-⏳ URL Expiration
+---
 
-A URL can optionally have an expiration time.
+# ⭐ Project Highlights
 
-Example:
+* Built a complete RESTful URL Shortener using Flask
+* Implemented automatic and custom short-code generation
+* Added URL validation and expiration
+* Implemented click tracking
+* Added detailed click analytics and click history
+* Implemented API rate limiting using Flask-Limiter
+* Created a responsive web dashboard
+* Built automated API tests using pytest
+* Used an isolated temporary database for testing
+* Tested APIs using Postman
+* Used Git and GitHub for version control
 
-{
-    "url": "https://www.example.com",
-    "expires_in": 60
-}
+---
 
-The application calculates the expiration timestamp and stores it in the database.
+# 🔮 Future Improvements
 
-After expiration, the URL cannot be used for redirection.
+Possible future enhancements include:
 
-🧰 Postman Testing
+* Redis caching
+* Redis-based rate-limit storage
+* User authentication
+* User-specific URL management
+* Advanced date-based analytics
+* Swagger/OpenAPI documentation
+* QR code generation
+* PostgreSQL support
+* Docker containerization
+* Cloud deployment
+* Custom domains
 
-The REST APIs can be tested using Postman.
+---
 
-Example workflow:
+# 🎯 Project Objective
 
-POST /shorten
-       ↓
-Create short URL
-       ↓
-GET /info/<short_code>
-       ↓
-Check URL information
-       ↓
-GET /<short_code>
-       ↓
-Redirect + increase click count
-       ↓
-GET /urls
-       ↓
-View all URLs
-       ↓
-DELETE /delete/<short_code>
-       ↓
-Delete URL
-💡 Project Highlights
+The main objective of this project is to demonstrate practical knowledge of:
 
-This project demonstrates practical understanding of:
+* Backend development
+* REST API design
+* Database management
+* API security
+* Caching concepts
+* Automated testing
+* Frontend-backend integration
+* Git/GitHub workflow
 
-Flask application development
-REST API design
-HTTP methods
-JSON request and response handling
-URL validation
-SQLite database operations
-CRUD operations
-Database queries
-URL redirection
-Click tracking
-Error handling
-Expiration logic
-Frontend and backend integration
-JavaScript fetch() API
-Automated testing with pytest
-Git and GitHub
-🔮 Future Improvements
+---
 
-Possible future improvements include:
+# 👩‍💻 Author
 
-User authentication and authorization
-Advanced URL analytics
-Click analytics by date
-Rate limiting
-Swagger/OpenAPI documentation
-QR code generation
-PostgreSQL database
-Redis caching
-Docker support
-Cloud deployment
-Custom domains
-User-specific URL management
-
-👩‍💻 Author
-
-Priyanka Patil
+**Priyanka Patil**
 
 BE Computer Engineering Student
 
-⭐ Project
+GitHub:
 
-If you find this project useful, feel free to explore the repository and provide fee
+```text
+https://github.com/Priyanka-github26
+```
